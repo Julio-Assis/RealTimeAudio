@@ -64,28 +64,18 @@ VAD_inputWord_audio = audioplayer(inputWord, fs);
 
 %% feature extraction
 % Mel frequency cepstral coefficients with first and second derivatives
-[coeffs_target_UP, deltaUP, deltaDeltaUP]          = featureExtractrion(sampleWordUP, fs);
-[coeffs_target_DOWN, deltaDOWN, deltaDeltaDOWN]    = featureExtractrion(sampleWordDOWN, fs);
-[coeffs_target_LEFT, deltaLEFT, deltaDeltaLEFT]    = featureExtractrion(sampleWordLEFT, fs);
-[coeffs_target_RIGHT, deltaRIGHT, deltaDeltaRIGHT] = featureExtractrion(sampleWordRIGHT, fs);
-[coeffs_input, deltaInput, deltaDeltaInput]        = featureExtractrion(inputWord, fs);
-
-featureVector_UP    = {coeffs_target_UP, deltaUP, deltaDeltaUP};
-featureVector_DOWN  = {coeffs_target_DOWN, deltaDOWN, deltaDeltaDOWN};
-featureVector_LEFT  = {coeffs_target_LEFT, deltaLEFT, deltaDeltaLEFT};
-featureVector_RIGHT = {coeffs_target_RIGHT, deltaRIGHT, deltaDeltaRIGHT};
-featureVector_Input = {coeffs_input, deltaInput, deltaDeltaInput};
-
+featureVector_UP    = featureExtractrion(sampleWordUP, fs);
+featureVector_DOWN  = featureExtractrion(sampleWordDOWN, fs);
+featureVector_LEFT  = featureExtractrion(sampleWordLEFT, fs);
+featureVector_RIGHT = featureExtractrion(sampleWordRIGHT, fs);
+featureVector_Input = featureExtractrion(inputWord, fs);
 
 %% DTW on feature vector sequence
-dist_UP = distanceMeasure(featureVector_UP, featureVector_Input);
-dist_DOWN = distanceMeasure(featureVector_DOWN, featureVector_Input);
-dist_LEFT = distanceMeasure(featureVector_LEFT, featureVector_Input);
-dist_RIGHT = distanceMeasure(featureVector_RIGHT, featureVector_Input);
+dist_UP = myDTW(featureVector_UP, featureVector_Input);
+dist_DOWN = myDTW(featureVector_DOWN, featureVector_Input);
+dist_LEFT = myDTW(featureVector_LEFT, featureVector_Input);
+dist_RIGHT = myDTW(featureVector_RIGHT, featureVector_Input);
 
- dist(1);
-% dist_delta = dist(2);
-% dist_deltaDelta = dist(3);
 %% disp result
 disp('Recognized word: ')
 switch min( [dist_UP, dist_DOWN, dist_LEFT, dist_RIGHT] )
