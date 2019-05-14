@@ -134,7 +134,7 @@ end
 currentVar = currentVar / numel(alignedFeatureVectors_UP);
 
 ProbModel(:, :, 1) = currentMean;
-ProbModel(:, :, 2) = currentVar;
+ProbModel(:, :, 2) = 1 * (currentVar + 10e-3);
 
 
 for i = 1 : numel(featureVectors_UP{i})
