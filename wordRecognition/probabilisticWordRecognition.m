@@ -94,87 +94,66 @@ end
 
 %% training probability model
 % init target probability model
-meanFeatureLength = 0;
-for i = 1 : length(featureVectors_UP)
-    meanFeatureLength = meanFeatureLength + size(featureVectors_UP{i}, 1);
+meanTimeLength = 0;
+for i = 1 : numel(featureVectors_UP)
+    meanTimeLength = meanTimeLength + size(featureVectors_UP{i}, 1);
 end
-meanFeatureLength = round(meanFeatureLength / length(featureVectors_UP));
-
-% @todo check possibilities for interpolation in matlab and maybe use for
-% simpler linear time alignment
-
+meanTimeLength = round(meanTimeLength / numel(featureVectors_UP));
+numOfFeatureCoeffs = size(featureVectors_UP{1}, 2);
 
 alignedFeatureVectors_UP = cell(size(featureVectors_UP));
-targetFeatureVector_UP = zeros(meanFeatureLength, length(featureVectors_UP));
+targetFeatureVector_UP = zeros(meanTimeLength, length(featureVectors_UP));
 
-comp = [1, 2, 3, 1/2, 1/3, 2/3, 4/3, 5/3, 7/3, 1/4, 3/4, 5/4, 7/4, 9/4, 1/5, 2/5, 3/5, 4/5, 6/5, 7/5, 8/5, 9/5, 11/5, 1/7, 2/7, 3/7, 4/7, 5/7, 6/7, 8/7, 9/7, 10/7, 11/4];
-diff = [0, 1, 2,   1,   2,   1,   1,   2,   4,   3,   1,   1,   3,   5,   4,   3,   2,   1,   1,   2,   3,   4,    6,   6,   5,   4,   3,   2,   1,   1,   2,    3,    4];
+% comp = [1, 2, 3, 1/2, 1/3, 2/3, 4/3, 5/3, 7/3, 1/4, 3/4, 5/4, 7/4, 9/4, 1/5, 2/5, 3/5, 4/5, 6/5, 7/5, 8/5, 9/5, 11/5, 1/7, 2/7, 3/7, 4/7, 5/7, 6/7, 8/7, 9/7, 10/7, 11/4];
+% diff = [0, 1, 2,   1,   2,   1,   1,   2,   4,   3,   1,   1,   3,   5,   4,   3,   2,   1,   1,   2,   3,   4,    6,   6,   5,   4,   3,   2,   1,   1,   2,    3,    4];
 
 for i = 1 : length(featureVectors_UP)
-    alignedFeatureVectors_UP{i} = myLTW(featureVectors_UP{i}, meanFeatureLength);
+    alignedFeatureVectors_UP{i} = myLTW(featureVectors_UP{i}, meanTimeLength);
 end
 
 
-% for i = 1 : length(featureVectors_UP)
-%     %currentMean = sum(featureVectors_UP{i}, 2);
-%     alignedFeatureVectors_UP{i} = zeros(meanFeatureLength, size(featureVectors_UP{i}, 2));
-%     
-%     a = meanFeatureLength / size(featureVectors_UP{i}, 1);
-%     mask = abs(comp - a) == min(abs(comp - a));
-%     c = comp(mask);
-%     d = diff(mask);
-%     
-% %     for j = 1 : meanFeatureLength
-% %         k = k + 1;
-% %         if c < 1 && mod(k * c, 1) == 0 && k > 1 && size(featureVectors_UP{i}, 1) - k - d > meanFeatureLength - j
-% %             k = k + d;
-% %         elseif c > 1 && mod(k * c, 1) == 0 && k > 1 && size(featureVectors_UP{i}, 1) - k + d < meanFeatureLength - j
-% %             k = k - d;
-% %         end
-% %         alignedFeatureVectors_UP{i}(j, :) = featureVectors_UP{i}(k, :);
-% %     end
-% %     disp("I'm here");
-%     
-%     if c < 1
-%         k = 0;
-%         for j = 1 : meanFeatureLength
-%             k = k + 1;
-%             if mod(k * c, 1) == 0 && k > 1 && size(featureVectors_UP{i}, 1) - k - d > meanFeatureLength - j
-%                 k = k + d; % skip d time windows
-%             end
-%             alignedFeatureVectors_UP{i}(j, :) = featureVectors_UP{i}(k, :);
-%         end
-%         
-%     % @todo implement case for c > 1
-%     elseif c > 1
-%         k = 0;
-%         for j = 1 : meanFeatureLength
-%             k = k + 1;
-%             alignedFeatureVectors_UP{i}(j, :) = featureVectors_UP{i}(k, :);
-%             if mod(j * c, 1) == 0 && k > d
-%                 k = k - d;
-%             end          
-%         end
-%     else
-%         for j = 1 : meanFeatureLength
-%             alignedFeatureVectors_UP{i}(j, :) = featureVectors_UP{i}(j, :);
-%         end
-%     end
-% end
+%% init probalistic model
+ProbModel = zeros(meanTimeLength, numOfFeatureCoeffs, 2);
+% distributionParams = zeros(meanTimeLength, size(alignedFeatureVectors_UP{1}, 2), 2);
 
-%% train probalistic model
+currentMean = zeros(meanTimeLength, numOfFeatureCoeffs);
+currentVar = zeros(meanTimeLength, numOfFeatureCoeffs);
 
-distributionParams = zeros(meanFeatureLength, size(alignedFeatureVectors_UP{1}, 2), 2);
-
-currentMean = zeros(size(alignedFeatureVectors_UP{1}));
 for i = numel(alignedFeatureVectors_UP)
     currentMean = currentMean + alignedFeatureVectors_UP{i};
 end
-currentMean = currentMean ./ numel(alignedFeatureVectors_UP);
+currentMean = currentMean / numel(alignedFeatureVectors_UP);
 
-% currentVar = 
-
-for j = 1 : meanFeatureLength
-    
-    distributionParams(i, 1) = alignedFeatureVectors_UP
+for i = numel(alignedFeatureVectors_UP)
+    for n = 1 : meanTimeLength
+        for m = 1 : numOfFeatureCoeffs
+            currentVar(n, m) = currentVar(n, m) + (alignedFeatureVectors_UP{i}(n, m) - currentMean(n, m))^2;
+        end
+    end
 end
+currentVar = currentVar / numel(alignedFeatureVectors_UP);
+
+ProbModel(:, :, 1) = currentMean;
+ProbModel(:, :, 2) = currentVar;
+
+
+for i = 1 : numel(featureVectors_UP{i})
+    myProbDistMeasure(ProbModel, featureVectors_UP{i});
+end
+
+
+%% EM Interation algorithm
+
+% while(distMeasure > errorEps)
+%     %% Estimation step
+%     % call estimation function and create new probablity distributions for
+%     % hidden states
+%     
+%     %% Maximization step
+%     % call maximization function and assign feature vectors to most likely
+%     % states for new evaluation of PDFs
+%     
+%     % distance measure for abortion criterium
+% end
+
+    
