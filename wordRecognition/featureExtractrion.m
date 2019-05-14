@@ -6,7 +6,7 @@ function features = featureExtractrion(audioInputVector, fs)
 [coeffs, ~, ~] = mfcc(audioInputVector, fs, 'WindowLength', 0.010*fs, 'OverlapLength', 0.005*fs);
 
 % normalization
-coeffs_mean = repmat(sum(coeffs, 1) ./ size(coeffs, 1), size(coeffs, 1), 1);
+coeffs_mean = repmat(sum(coeffs, 1) ./ size(coeffs, 1), size(coeffs, 1), 1); % time mean for each coefficient
 coeffs_norm = coeffs - coeffs_mean;
 coeffs_norm(:, 1) = coeffs_norm(:, 1) - max(coeffs_norm(:, 1));
 

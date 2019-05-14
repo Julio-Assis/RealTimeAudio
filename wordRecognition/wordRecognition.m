@@ -9,10 +9,11 @@ inputWordRecording.StartFcn = 'disp(''Start speaking  word.'')';
 inputWordRecording.StopFcn   = 'disp(''End of recording.'')';
 
 % load target audio vectors
-sampleWordUP = audioread('SampleWord_UP_03.wav');
-sampleWordDOWN = audioread('SampleWord_DOWN_03.wav');
-sampleWordLEFT = audioread('SampleWord_LEFT_03.wav');
-sampleWordRIGHT = audioread('SampleWord_RIGHT_03.wav');
+addpath('sampleWords');
+sampleWordUP = audioread('sampleWords/SampleWord_UP_03.wav');
+sampleWordDOWN = audioread('sampleWords/SampleWord_DOWN_03.wav');
+sampleWordLEFT = audioread('sampleWords/SampleWord_LEFT_03.wav');
+sampleWordRIGHT = audioread('sampleWords/SampleWord_RIGHT_03.wav');
 
 %% record word
 pause on
@@ -40,27 +41,12 @@ play(inputWordRecording);
 pause(3);
 
 %% apply voice activation by thresholding
-inputWordEnergy = inputWordData.^2;
-
-VAD_mask = false(size(inputWordData));
-
-energyThreshold = 0.05;
+energyThreshold = 0.02;
 toleranceGap = 0.3 * fs;
-gapCounter = 1;
-for i = 1 : numel(inputWordEnergy)
-    if (inputWordEnergy(i) > energyThreshold)
-        gapCounter = 1;
-        VAD_mask(i) = true;
-    else
-        gapCounter = gapCounter + 1;
-        if gapCounter <= toleranceGap
-            VAD_mask(i) = true;
-        end
-    end
-end
 
-inputWord = inputWordData(VAD_mask);
-VAD_inputWord_audio = audioplayer(inputWord, fs);
+inputWord = myVAD(inputWordData, energyThreshold, toleranceGap);
+inputWordAudio = audioplayer(inputWord, fs); % for playback
+play(inputWordAudio);
 
 %% feature extraction
 % Mel frequency cepstral coefficients with first and second derivatives
