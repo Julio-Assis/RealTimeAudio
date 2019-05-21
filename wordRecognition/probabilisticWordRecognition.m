@@ -41,6 +41,9 @@ inputWord = myVAD(inputWordData, energyThreshold, toleranceGap);
 inputWordAudio = audioplayer(inputWord, fs); % for playback
 
 %% % load sample audio vectors
+
+% @todo: implement function: readTrainingData()
+
 addpath('sampleWords');
 sampleWords_UP = cell(1, 5);
 sampleWords_UP{1} = audioread('sampleWord_UP_2019_5_8_15_44.wav');
@@ -86,74 +89,33 @@ featureVectors_LEFT = cell(size(sampleWords_LEFT));
 for i = 1 : length(featureVectors_LEFT)
     featureVectors_LEFT{i} = featureExtractrion(sampleWords_LEFT{i}, fs);
 end
-
+numOfTrainingSamples
 featureVectors_RIGHT = cell(size(sampleWords_RIGHT));
 for i = 1 : length(featureVectors_RIGHT)
     featureVectors_RIGHT{i} = featureExtractrion(sampleWords_RIGHT{i}, fs);
 end
 
-%% training probability model
-% init target probability model
-meanTimeLength = 0;
-for i = 1 : numel(featureVectors_UP)
-    meanTimeLength = meanTimeLength + size(featureVectors_UP{i}, 1);
+
+%% Train probability model using EM iteration algorithm
+
+% init model
+[alignedFeatureVectors_UP, assignedStates_UP, distMeasure] = initProbabilityModel(featureVectors_UP);
+
+errorEps = 1; % set value for converged error
+
+while(distMeasure > errorEps)
+    %% Estimation step
+    % call estimation function and create new probablity distributions for
+    % hidden states
+    ProbModel_UP = estimationStep(alignedFeatureVectors_UP, assignedStates_UP);
+    
+    %% Maximization step
+    % call maximization function and assign feature vectors to most likely
+    % states for new evaluation of PDFs
+    [assignedStates_UP, dist_UP] = maximizationStep(ProbModel_UP, featureVectors_UP);
+    
+    %% evaluate distance for abortion criterium
+    distMeasure = sum(dist_UP);
 end
-meanTimeLength = round(meanTimeLength / numel(featureVectors_UP));
-numOfFeatureCoeffs = size(featureVectors_UP{1}, 2);
-
-alignedFeatureVectors_UP = cell(size(featureVectors_UP));
-targetFeatureVector_UP = zeros(meanTimeLength, length(featureVectors_UP));
-
-% comp = [1, 2, 3, 1/2, 1/3, 2/3, 4/3, 5/3, 7/3, 1/4, 3/4, 5/4, 7/4, 9/4, 1/5, 2/5, 3/5, 4/5, 6/5, 7/5, 8/5, 9/5, 11/5, 1/7, 2/7, 3/7, 4/7, 5/7, 6/7, 8/7, 9/7, 10/7, 11/4];
-% diff = [0, 1, 2,   1,   2,   1,   1,   2,   4,   3,   1,   1,   3,   5,   4,   3,   2,   1,   1,   2,   3,   4,    6,   6,   5,   4,   3,   2,   1,   1,   2,    3,    4];
-
-for i = 1 : length(featureVectors_UP)
-    alignedFeatureVectors_UP{i} = myLTW(featureVectors_UP{i}, meanTimeLength);
-end
-
-
-%% init probalistic model
-ProbModel = zeros(meanTimeLength, numOfFeatureCoeffs, 2);
-% distributionParams = zeros(meanTimeLength, size(alignedFeatureVectors_UP{1}, 2), 2);
-
-currentMean = zeros(meanTimeLength, numOfFeatureCoeffs);
-currentVar = zeros(meanTimeLength, numOfFeatureCoeffs);
-
-for i = numel(alignedFeatureVectors_UP)
-    currentMean = currentMean + alignedFeatureVectors_UP{i};
-end
-currentMean = currentMean / numel(alignedFeatureVectors_UP);
-
-for i = numel(alignedFeatureVectors_UP)
-    for n = 1 : meanTimeLength
-        for m = 1 : numOfFeatureCoeffs
-            currentVar(n, m) = currentVar(n, m) + (alignedFeatureVectors_UP{i}(n, m) - currentMean(n, m))^2;
-        end
-    end
-end
-currentVar = currentVar / numel(alignedFeatureVectors_UP);
-
-ProbModel(:, :, 1) = currentMean;
-ProbModel(:, :, 2) = 1 * (currentVar + 10e-3);
-
-
-for i = 1 : numel(featureVectors_UP{i})
-    myProbDistMeasure(ProbModel, featureVectors_UP{i});
-end
-
-
-%% EM Interation algorithm
-
-% while(distMeasure > errorEps)
-%     %% Estimation step
-%     % call estimation function and create new probablity distributions for
-%     % hidden states
-%     
-%     %% Maximization step
-%     % call maximization function and assign feature vectors to most likely
-%     % states for new evaluation of PDFs
-%     
-%     % distance measure for abortion criterium
-% end
 
     
