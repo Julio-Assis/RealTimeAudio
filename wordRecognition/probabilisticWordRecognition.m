@@ -89,7 +89,7 @@ featureVectors_LEFT = cell(size(sampleWords_LEFT));
 for i = 1 : length(featureVectors_LEFT)
     featureVectors_LEFT{i} = featureExtractrion(sampleWords_LEFT{i}, fs);
 end
-numOfTrainingSamples
+
 featureVectors_RIGHT = cell(size(sampleWords_RIGHT));
 for i = 1 : length(featureVectors_RIGHT)
     featureVectors_RIGHT{i} = featureExtractrion(sampleWords_RIGHT{i}, fs);
@@ -103,6 +103,7 @@ end
 
 errorEps = 1; % set value for converged error
 
+i = 1;
 while(distMeasure > errorEps)
     %% Estimation step
     % call estimation function and create new probablity distributions for
@@ -115,7 +116,8 @@ while(distMeasure > errorEps)
     [assignedStates_UP, dist_UP] = maximizationStep(ProbModel_UP, featureVectors_UP);
     
     %% evaluate distance for abortion criterium
-    distMeasure = sum(dist_UP);
+    distMeasure = sum(dist_UP)
+    i = i + 1;
 end
 
     

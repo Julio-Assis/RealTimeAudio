@@ -37,18 +37,35 @@ accumulatedDist = D(S, T);
 assignedHiddenStates = zeros(T, 1);
 assignedHiddenStates(T) = S;
 
-stateDelta = [0, 1, 2]; % 
+stateDelta = [0, 1, 2]; % standard (0, 1, 2)-Model
 backStep = 0; % of hidden states
+minPrevState = S; % current state with minimum distance
+
+% iterate time steps backwards and assign best fitting state
 for m = 1 : T-2
-    refrStates = [D(S-backStep, T-m), D(S-backStep-1, T-m), D(S-backStep-2, T-m)];
-    currentMask = refrStates == min(refrStates);
-    if sum(currentMask) > 1
-        currentMask = [false, true, false];
+    if minPrevState < 2
+        refrStates =  D(minPrevState, T-m);
+        
+        currentMask = refrStates == min(refrStates);
+    elseif minPrevState < 3
+        refrStates = [D(minPrevState, T-m), D(minPrevState-1, T-m)];
+        
+        currentMask = refrStates == min(refrStates);
+        if sum(currentMask) > 1 % more than one minimum
+            currentMask = [true, false];
+        end
+    else
+        refrStates = [D(minPrevState, T-m), D(minPrevState-1, T-m), D(minPrevState-2, T-m)];
+
+        currentMask = refrStates == min(refrStates);
+        if sum(currentMask) > 1 % more than one minimumcurrentMask
+            currentMask = [false, true, false];
+        end
     end
     
     backStep = backStep + stateDelta(currentMask);
+    
     minPrevState = S - backStep;
-
     assignedHiddenStates(T-m) = minPrevState;
 end
 assignedHiddenStates(1) = 1;
