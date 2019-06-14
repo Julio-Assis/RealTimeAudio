@@ -4,7 +4,7 @@ import numpy as np
 class VoiceRecorder:
 
   GamesToCommands = {
-    'MsPacman-v0' : ['UP', 'DOWN', 'LEFT', 'RIGHT']
+    'MsPacman-v0' : ['UP', 'DOWN', 'LEFT', 'RIGHT', 'SILENCE']
   }
 
   SavePath = './GameEnvironment/CommandRecords/'
@@ -17,7 +17,7 @@ class VoiceRecorder:
     for command in commands:
       self.record_n_times(command)
 
-  def record_n_times(self, command, times=1, fs = 44100, duration=3):
+  def record_n_times(self, command, times=1, fs = 44100, duration=2, channels=1):
     
     print('-'*20)
     print("Let's record the command={} {} times".format(command, times))
@@ -27,7 +27,7 @@ class VoiceRecorder:
       recording = sd.rec(
         int(duration * fs),
         samplerate=fs,
-        channels=2,
+        channels=channels,
         blocking=True
       )
       print('Record {} done'.format(i + 1))

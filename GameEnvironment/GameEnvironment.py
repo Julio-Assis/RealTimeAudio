@@ -1,13 +1,13 @@
-################### ORIGINAL ########################
 #!/usr/bin/env python
 from __future__ import print_function
-from VoiceRecorder import VoiceRecorder
-from CommandFFTTransformer import CommandFFTTransformer
 
 import sys
 import gym
 import time
-
+import numpy as np
+import threading
+import sounddevice as sd
+from glob import glob
 
 class GameEnvironment:
 
@@ -24,6 +24,7 @@ class GameEnvironment:
         self.restart_key = 0xff0d
         self.game_name = game_name
         self.env = []
+        self.game_error = False
         self.create_env()
 
     def create_env(self):
@@ -37,11 +38,9 @@ class GameEnvironment:
         self.SKIP_CONTROL = 0
         # can test what skip is still usable.
 
-        print("ACTIONS={}".format(self.ACTIONS))
+        print('ACTIONS={}'.format(self.ACTIONS))
 
         self.env.render()
-        self.env.unwrapped.viewer.window.on_key_press = self.key_press
-        self.env.unwrapped.viewer.window.on_key_release = self.key_release
 
     def key_press(self, key, mod):
 
@@ -70,13 +69,56 @@ class GameEnvironment:
         else:
             return
 
+    def play_with_keys(self):
+        self.env.unwrapped.viewer.window.on_key_press = self.key_press
+        self.env.unwrapped.viewer.window.on_key_release = self.key_release
+
+    def play_random(self):
+        while True:
+            play = np.random.randint(1,5)
+            self.human_agent_action = play
+            time.sleep(0.5)
+
+    def play_with_voice(self, matcher = None):
+
+        play = True
+        if matcher == None:
+            self.game_error = 'To play with voice you have to provide a matcher'
+            play = False
+
+        while play:
+            command_signal = sd.rec(
+                frames=2 * 44100,
+                samplerate=44100,
+                channels=1,
+                blocking=True)
+            action = matcher.get_closest(command_signal)
+            distances = matcher.ranked_distances(command_signal)
+            print('last action={}'.format(action))
+            print('distances')
+            print(distances)
+            self.set_agent_action(action)
+
+    def set_agent_action(self, action):
+
+        if action == 'LEFT':
+            self.human_agent_action = 3
+        elif action == 'UP':
+            self.human_agent_action = 1
+        elif action == 'RIGHT':
+            self.human_agent_action = 2
+        elif action == 'DOWN':
+            self.human_agent_action = 4
+        else:
+            return
+
     def rollout(self):
         self.human_wants_restart = False
         obser = self.env.reset()
         skip = 0
         total_reward = 0
         total_timesteps = 0
-        while 1:
+        while 1 and not self.game_error:
             if not skip:
                 a = self.human_agent_action
                 total_timesteps += 1
@@ -99,35 +141,23 @@ class GameEnvironment:
                 self.env.render()
                 time.sleep(0.1)
             time.sleep(0.1)
+
         print("timesteps %i reward %0.2f" % (total_timesteps, total_reward))
 
-    def run_game(self):
+    def run_game(self, mode, matcher=None):
+
+        threads = []
+        if matcher:
+            t = threading.Thread(target=mode, args=(matcher,))
+        else:
+            t = threading.Thread(target=mode)
+        threads.append(t)
+        t.start()
         
-        while 1:
+        while 1 and not self.game_error:
             window_still_open = self.rollout()
             if window_still_open == False:
                 break
 
-
-if __name__ == "__main__":
-
-    #
-    # Test yourself as a learning agent! Pass environment name as a command-line argument, for example:
-    #
-    # python keyboard_agent.py SpaceInvadersNoFrameskip-v4
-    #
-    game_name = 'MsPacman-v0' if len(sys.argv) < 2 else sys.argv[1]
-    voice_recorder = VoiceRecorder(game_name)
-    voice_recorder.record_commands()
-    transformer = CommandFFTTransformer(
-        commands=VoiceRecorder.GamesToCommands[game_name],
-        command_records_path=VoiceRecorder.SavePath
-    )
-    transformer.record_transforms()
-    sys.exit()
-    game = GameEnvironment(game_name)
-    threads = []
-    t = threading.Thread(target=game.play_random)
-    threads.append(t)
-    t.start()
-    game.run_game()
+        if self.game_error:
+            print(self.game_error)

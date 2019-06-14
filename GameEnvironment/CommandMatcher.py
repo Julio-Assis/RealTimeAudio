@@ -15,8 +15,9 @@ class CommandMatcher:
       command = file_name.split('.')[0] # remove the file extension
       self.fft_transforms_by_command[command] = command_fft 
 
-  def get_closest(self, target_fft):
+  def get_closest(self, target_signal):
 
+    target_fft = np.fft.fft(target_signal)
     min_dist = np.inf
     for command in self.fft_transforms_by_command.keys():
         diff = target_fft - self.fft_transforms_by_command[command]
@@ -28,8 +29,9 @@ class CommandMatcher:
 
     return closest_command
 
-  def ranked_distances(self, target_fft):
+  def ranked_distances(self, target_signal):
     distances = []
+    target_fft = np.fft.fft(target_signal)
     for command in self.fft_transforms_by_command:
       diff = target_fft - self.fft_transforms_by_command[command]
       dist = np.linalg.norm(diff)
