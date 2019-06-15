@@ -42,36 +42,7 @@ inputWordAudio = audioplayer(inputWord, fs); % for playback
 
 %% % load sample audio vectors
 
-% @todo: implement function: readTrainingData()
-
-addpath('sampleWords');
-sampleWords_UP = cell(1, 5);
-sampleWords_UP{1} = audioread('sampleWord_UP_2019_5_8_15_44.wav');
-sampleWords_UP{2} = audioread('sampleWord_UP_2019_5_8_15_45_59.078773.wav');
-sampleWords_UP{3} = audioread('sampleWord_UP_2019_5_8_15_46_30.358709.wav');
-sampleWords_UP{4} = audioread('sampleWord_UP_2019_5_8_15_47_2.196858.wav');
-sampleWords_UP{5} = audioread('SampleWord_UP_03.wav');
-
-sampleWords_DOWN = cell(1, 5);
-sampleWords_DOWN{1} = audioread('sampleWord_DOWN_2019_5_8_15_44.wav');
-sampleWords_DOWN{2} = audioread('sampleWord_DOWN_2019_5_8_15_45_59.078773.wav');
-sampleWords_DOWN{3} = audioread('sampleWord_DOWN_2019_5_8_15_46_30.358709.wav');
-sampleWords_DOWN{4} = audioread('sampleWord_DOWN_2019_5_8_15_47_2.196858.wav');
-sampleWords_DOWN{5} = audioread('SampleWord_DOWN_03.wav');
-
-sampleWords_LEFT = cell(1, 5);
-sampleWords_LEFT{1} = audioread('sampleWord_LEFT_2019_5_8_15_44.wav');
-sampleWords_LEFT{2} = audioread('sampleWord_LEFT_2019_5_8_15_45_59.078773.wav');
-sampleWords_LEFT{3} = audioread('sampleWord_LEFT_2019_5_8_15_46_30.358709.wav');
-sampleWords_LEFT{4} = audioread('sampleWord_LEFT_2019_5_8_15_47_2.196858.wav');
-sampleWords_LEFT{5} = audioread('SampleWord_LEFT_03.wav');
-
-sampleWords_RIGHT = cell(1, 5);
-sampleWords_RIGHT{1} = audioread('sampleWord_RIGHT_2019_5_8_15_44.wav');
-sampleWords_RIGHT{2} = audioread('sampleWord_RIGHT_2019_5_8_15_45_59.078773.wav');
-sampleWords_RIGHT{3} = audioread('sampleWord_RIGHT_2019_5_8_15_46_30.358709.wav');
-sampleWords_RIGHT{4} = audioread('sampleWord_RIGHT_2019_5_8_15_47_2.196858.wav');
-sampleWords_RIGHT{5} = audioread('SampleWord_RIGHT_03.wav');
+[sampleWords_UP, sampleWords_DOWN, sampleWords_LEFT, sampleWords_RIGHT] = readTrainingData();
 
 %% feature extraction
 % Mel frequency cepstral coefficients with first and second derivatives
