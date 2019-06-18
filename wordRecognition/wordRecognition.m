@@ -10,10 +10,10 @@ inputWordRecording.StopFcn   = 'disp(''End of recording.'')';
 
 % load target audio vectors
 addpath('sampleWords');
-sampleWordUP = audioread('sampleWords/SampleWord_UP_03.wav');
-sampleWordDOWN = audioread('sampleWords/SampleWord_DOWN_03.wav');
-sampleWordLEFT = audioread('sampleWords/SampleWord_LEFT_03.wav');
-sampleWordRIGHT = audioread('sampleWords/SampleWord_RIGHT_03.wav');
+sampleWordUP = audioread('sampleWords/up/SampleWord_UP_03.wav');
+sampleWordDOWN = audioread('sampleWords/down/SampleWord_DOWN_03.wav');
+sampleWordLEFT = audioread('sampleWords/left/SampleWord_LEFT_03.wav');
+sampleWordRIGHT = audioread('sampleWords/right/SampleWord_RIGHT_03.wav');
 
 %% record word
 pause on
