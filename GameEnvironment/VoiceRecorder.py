@@ -13,12 +13,12 @@ class VoiceRecorder:
     def __init__(self, game_name):
         self.game_name = game_name
 
-    def record_commands(self):
+    def record_commands(self, frames, sample_rate, channels):
         commands = VoiceRecorder.GamesToCommands[self.game_name]
         for command in commands:
-            self.record_n_times(command)
+            self.record_n_times(command, frames, sample_rate, channels)
 
-    def record_n_times(self, command, times=1, fs=44100, duration=2, channels=1):
+    def record_n_times(self, command, frames, sample_rate, channels, times=1):
 
         print('-'*20)
         print("Let's record the command={} {} times".format(command, times))
@@ -26,8 +26,8 @@ class VoiceRecorder:
             print('Starting record {}'.format(i + 1))
             print('Speak!')
             recording = sd.rec(
-                int(duration * fs),
-                samplerate=fs,
+                frames=frames,
+                samplerate=sample_rate,
                 channels=channels,
                 blocking=True
             )
