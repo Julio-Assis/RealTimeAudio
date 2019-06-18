@@ -1,13 +1,13 @@
 from GameEnvironment.GameEnvironment import GameEnvironment
 from GameEnvironment.VoiceRecorder import VoiceRecorder
-from GameEnvironment.CommandMatcher import CommandMatcher
+from GameEnvironment.DumbMatcher import DumbMatcher
 from GameEnvironment.CommandFFTTransformer import CommandFFTTransformer
 
 from glob import glob
 import sys
 
 if __name__ == '__main__':
-  
+
     #
     # python keyboard_agent.py SpaceInvadersNoFrameskip-v4
     #
@@ -20,6 +20,9 @@ if __name__ == '__main__':
     )
     transformer.record_transforms()
     files = glob(CommandFFTTransformer.SavePath + '*')
-    matcher = CommandMatcher(files)
-    game = GameEnvironment(game_name)
+    frames = 2 * 44100
+    sample_rate = 44100
+    channels = 1
+    matcher = DumbMatcher(frames, sample_rate, channels, files)
+    game = GameEnvironment(game_name, frames, sample_rate, channels)
     game.run_game(game.play_with_voice, matcher=matcher)

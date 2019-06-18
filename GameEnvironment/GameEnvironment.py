@@ -1,13 +1,11 @@
 #!/usr/bin/env python
 from __future__ import print_function
 
-import sys
 import gym
 import time
 import numpy as np
 import threading
 import sounddevice as sd
-from glob import glob
 
 class GameEnvironment:
 
@@ -16,7 +14,10 @@ class GameEnvironment:
     LEFT_ARROW = 65361
     DOWN_ARROW = 65364
 
-    def __init__(self, game_name):
+    def __init__(self, game_name, frames, sample_rate, channels):
+        self.frames = frames
+        self.sample_rate = sample_rate
+        self.channels = channels
         self.human_agent_action = 0
         self.human_wants_restart = False
         self.human_sets_pause = False
@@ -88,15 +89,11 @@ class GameEnvironment:
 
         while play:
             command_signal = sd.rec(
-                frames=2 * 44100,
-                samplerate=44100,
-                channels=1,
+                frames=self.frames,
+                samplerate=self.sample_rate,
+                channels=self.channels,
                 blocking=True)
             action = matcher.get_closest(command_signal)
-            distances = matcher.ranked_distances(command_signal)
-            print('last action={}'.format(action))
-            print('distances')
-            print(distances)
             self.set_agent_action(action)
 
     def set_agent_action(self, action):
@@ -127,8 +124,6 @@ class GameEnvironment:
                 skip -= 1
 
             obser, r, done, info = self.env.step(a)
-            if r != 0:
-                print("reward %0.3f" % r)
             total_reward += r
             window_still_open = self.env.render()
             if window_still_open == False:
@@ -146,12 +141,10 @@ class GameEnvironment:
 
     def run_game(self, mode, matcher=None):
 
-        threads = []
         if matcher:
             t = threading.Thread(target=mode, args=(matcher,))
         else:
             t = threading.Thread(target=mode)
-        threads.append(t)
         t.start()
         
         while 1 and not self.game_error:
