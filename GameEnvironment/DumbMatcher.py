@@ -1,9 +1,10 @@
 import numpy as np
+from GameEnvironment.GeneralCommandMatcher import GeneralCommandMatcher
 
+class DumbMatcher(GeneralCommandMatcher):
 
-class CommandMatcher:
-
-    def __init__(self, command_files):
+    def __init__(self, frames, sample_rate, channels, command_files):
+        super().__init__(frames, sample_rate, channels)
         self.command_files = command_files
         self.fft_transforms_by_command = {}
         self.load_commands()
