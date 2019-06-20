@@ -1,7 +1,7 @@
 from GameEnvironment.GameEnvironment import GameEnvironment
 from GameEnvironment.VoiceRecorder import VoiceRecorder
 from GameEnvironment.DumbMatcher import DumbMatcher
-from GameEnvironment.CommandFFTTransformer import CommandFFTTransformer
+from GameEnvironment.FeatureExtractor import FeatureExtractor
 
 from glob import glob
 import sys
@@ -17,12 +17,12 @@ if __name__ == '__main__':
     channels = 1
     voice_recorder = VoiceRecorder(game_name)
     voice_recorder.record_commands(frames, sample_rate, channels)
-    transformer = CommandFFTTransformer(
+    transformer = FeatureExtractor(
         commands=VoiceRecorder.GamesToCommands[game_name],
         command_records_path=VoiceRecorder.SavePath
     )
-    transformer.record_transforms()
-    files = glob(CommandFFTTransformer.SavePath + '*')
+    transformer.extract_features()
+    files = glob(FeatureExtractor.SavePath + '*')
 
     matcher = DumbMatcher(frames, sample_rate, channels, files)
     game = GameEnvironment(game_name, frames, sample_rate, channels)
