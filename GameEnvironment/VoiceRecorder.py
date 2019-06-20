@@ -1,6 +1,6 @@
 import sounddevice as sd
 import numpy as np
-
+import time
 
 class VoiceRecorder:
 
@@ -15,6 +15,7 @@ class VoiceRecorder:
 
     def record_commands(self, frames, sample_rate, channels):
         commands = VoiceRecorder.GamesToCommands[self.game_name]
+        VoiceRecorder.display_recording_start(3)
         for command in commands:
             self.record_n_times(command, frames, sample_rate, channels)
 
@@ -35,3 +36,10 @@ class VoiceRecorder:
             file_name = VoiceRecorder.SavePath + \
                 'command_{}_record_{}.npy'.format(command, i)
             np.save(file_name, recording)
+
+    @staticmethod
+    def display_recording_start(seconds_to_wait):
+        print('Start recording in...')
+        for i in range(seconds_to_wait):
+            print(seconds_to_wait - i)
+            time.sleep(1)
