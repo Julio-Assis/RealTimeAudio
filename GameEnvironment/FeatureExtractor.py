@@ -12,8 +12,6 @@ class FeatureExtractor:
 
     def extract_features(self):
         files = glob(self.command_records_path + '*')
-        print('checking files')
-        print(files)
         for f in files:
             sound_array = np.load(f)
             command = self.get_command(f)
