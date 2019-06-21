@@ -1,7 +1,6 @@
-from GameEnvironment.GameEnvironment import GameEnvironment
 from GameEnvironment.VoiceRecorder import VoiceRecorder
-from GameEnvironment.DumbMatcher import DumbMatcher
 from GameEnvironment.FeatureExtractor import FeatureExtractor
+from game_menu import get_inputs_and_play
 
 from glob import glob
 import sys
@@ -23,7 +22,5 @@ if __name__ == '__main__':
     )
     transformer.extract_features()
     files = glob(FeatureExtractor.SavePath + '*')
-
-    matcher = DumbMatcher(frames, sample_rate, channels, files)
-    game = GameEnvironment(game_name, frames, sample_rate, channels)
-    game.run_game(game.play_with_voice, matcher=matcher)
+    get_inputs_and_play(game_name, frames, sample_rate, channels, files)
+    
