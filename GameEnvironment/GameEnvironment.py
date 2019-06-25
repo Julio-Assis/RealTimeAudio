@@ -88,12 +88,15 @@ class GameEnvironment:
             play = False
 
         while play:
+            print('-'*20)
+            print('recording new command...')
             command_signal = sd.rec(
                 frames=self.frames,
                 samplerate=self.sample_rate,
                 channels=self.channels,
                 blocking=True)
             action = matcher.get_closest(command_signal)
+            print('your command: ' + action)
             self.set_agent_action(action)
 
     def set_agent_action(self, action):
@@ -146,7 +149,7 @@ class GameEnvironment:
         else:
             t = threading.Thread(target=mode)
         t.start()
-        
+
         while 1 and not self.game_error:
             window_still_open = self.rollout()
             if window_still_open == False:
