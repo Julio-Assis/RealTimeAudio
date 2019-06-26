@@ -1,5 +1,6 @@
 from GameEnvironment.GameEnvironment import GameEnvironment
 from GameEnvironment.DumbMatcher import DumbMatcher
+from GameEnvironment.DanielMatcher import DanielMatcher
 import sys
 
 def get_inputs_and_play(game_name, frames, sample_rate, channels, files):
@@ -55,7 +56,8 @@ def execute_game_mode(game_name, game_mode, frames, sample_rate, channels, files
     elif game_mode == 4:
         raise Exception('Not implemented matcher.')
     elif game_mode == 5:
-        raise Exception('Not implemented matcher.')
+        matcher = DanielMatcher(frames, sample_rate, channels, files)
+        game.run_game(game.play_with_voice, matcher=matcher)
     else:
         print('Bye bye')
         sys.exit()
