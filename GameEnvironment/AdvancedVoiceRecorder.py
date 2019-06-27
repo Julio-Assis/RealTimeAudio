@@ -4,7 +4,7 @@ import time
 from glob import glob
 
 
-class VoiceRecorder:
+class AdvancedVoiceRecorder:
 
     GamesToCommands = {
         'MsPacman-v0': ['UP', 'DOWN', 'LEFT', 'RIGHT', 'SILENCE']
@@ -13,13 +13,13 @@ class VoiceRecorder:
     SavePath = './GameEnvironment/CommandRecords/'
 
     VADThreshold = 0.05
-    
+
     def __init__(self, game_name):
         self.game_name = game_name
 
     def record_commands(self, frames, sample_rate, channels):
-        commands = VoiceRecorder.GamesToCommands[self.game_name]
-        VoiceRecorder.display_recording_start(3)
+        commands = AdvancedVoiceRecorder.GamesToCommands[self.game_name]
+        AdvancedVoiceRecorder.display_recording_start(3)
         for command in commands:
             self.record_n_times(command, frames, sample_rate, channels)
         self.play_recorded_commands(sample_rate)
@@ -41,7 +41,7 @@ class VoiceRecorder:
             recording = self.discard_first_samples(recording, sample_rate)
             if command != 'SILENCE':
                 recording = self.voice_activity_detection(recording, sample_rate)
-            file_name = VoiceRecorder.SavePath + 'command_{}_record_{}.npy'.format(command, i)
+            file_name = AdvancedVoiceRecorder.SavePath + 'command_{}_record_{}.npy'.format(command, i)
             np.save(file_name, recording)
 
     def discard_first_samples(self, recording, sample_rate):
@@ -94,4 +94,3 @@ class VoiceRecorder:
         for i in range(seconds_to_wait):
             print(seconds_to_wait - i)
             time.sleep(1)
-

@@ -1,14 +1,19 @@
 from GameEnvironment.GameEnvironment import GameEnvironment
 from GameEnvironment.DumbMatcher import DumbMatcher
 from GameEnvironment.DanielMatcher import DanielMatcher
+from GameEnvironment.FFTFeatureExtractor import FFTFeatureExtractor
+from GameEnvironment.MFCCFeatureExtractor import MFCCFeatureExtractor
+from GameEnvironment.AdvancedVoiceRecorder import AdvancedVoiceRecorder
+from GameEnvironment.BasicVoiceRecorder import BasicVoiceRecorder
+from glob import glob
 import sys
 
-def get_inputs_and_play(game_name, frames, sample_rate, channels, files):
-    
+def get_inputs_and_play(game_name):
+
     greeting_message()
     game_mode = get_game_mode()
     game_mode = validate_game_mode(game_mode)
-    execute_game_mode(game_name, game_mode, frames, sample_rate, channels, files)
+    execute_game_mode(game_name, game_mode)
 
 def greeting_message():
     print('Welcome to the voiced PacMan Game!')
@@ -38,29 +43,72 @@ def validate_game_mode(game_mode):
 
     if game_mode in [1, 2, 3, 4, 5]:
         return game_mode
-    
+
     print(bye_message)
     sys.exit()
 
-def execute_game_mode(game_name, game_mode, frames, sample_rate, channels, files):
+def execute_game_mode(game_name, game_mode):
 
-    game = GameEnvironment(game_name, frames, sample_rate, channels)
-        
     if game_mode == 1:
-        game.run_game(mode=game.play_random)
+        play_random(game_name)
     elif game_mode == 2:
-        game.run_game(mode=game.play_with_keys)
+        play_with_keys(game_name)
     elif game_mode == 3:
-        matcher = DumbMatcher(frames, sample_rate, channels, files)
-        game.run_game(game.play_with_voice, matcher=matcher)
+        play_with_dumb_matcher(game_name)
     elif game_mode == 4:
         raise Exception('Not implemented matcher.')
     elif game_mode == 5:
-        matcher = DanielMatcher(frames, sample_rate, channels, files)
-        game.run_game(game.play_with_voice, matcher=matcher)
+        play_with_daniel_matcher(game_name)
     else:
         print('Bye bye')
         sys.exit()
 
-    
-    
+def play_random(game_name):
+    sample_rate = 44100
+    frames = 2 * sample_rate
+    channels = 1
+
+    game = GameEnvironment(game_name, frames, sample_rate, channels)
+    game.run_game(mode=game.play_random)
+
+def play_with_keys(game_name):
+    sample_rate = 44100
+    frames = 2 * sample_rate
+    channels = 1
+
+    game = GameEnvironment(game_name, frames, sample_rate, channels)
+    game.run_game(mode=game.play_with_keys)
+
+def play_with_dumb_matcher(game_name):
+    sample_rate = 44100
+    frames = 2 * sample_rate
+    channels = 1
+    voice_recorder = BasicVoiceRecorder(game_name)
+    voice_recorder.record_commands(frames, sample_rate, channels)
+    transformer = FFTFeatureExtractor(
+        commands=BasicVoiceRecorder.GamesToCommands[game_name],
+        command_records_path=BasicVoiceRecorder.SavePath
+    )
+    transformer.extract_features()
+    files = glob(FFTFeatureExtractor.SavePath + '*')
+    matcher = DumbMatcher(frames, sample_rate, channels, files)
+
+    game = GameEnvironment(game_name, frames, sample_rate, channels)
+    game.run_game(game.play_with_voice, matcher=matcher)
+
+def play_with_daniel_matcher(game_name):
+    sample_rate = 16000
+    frames = 1 * sample_rate
+    channels = 1
+    voice_recorder = AdvancedVoiceRecorder(game_name)
+    voice_recorder.record_commands(frames, sample_rate, channels)
+    transformer = MFCCFeatureExtractor(
+        commands=AdvancedVoiceRecorder.GamesToCommands[game_name],
+        command_records_path=AdvancedVoiceRecorder.SavePath
+    )
+    transformer.extract_features()
+    files = glob(MFCCFeatureExtractor.SavePath + '*')
+    matcher = DanielMatcher(frames, sample_rate, channels, files)
+
+    game = GameEnvironment(game_name, frames, sample_rate, channels)
+    game.run_game(game.play_with_voice, matcher=matcher)

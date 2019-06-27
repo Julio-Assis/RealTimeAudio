@@ -1,7 +1,7 @@
 import numpy as np
-from GameEnvironment.FeatureExtractor import FeatureExtractor
+from GameEnvironment.MFCCFeatureExtractor import MFCCFeatureExtractor
 from GameEnvironment.GeneralCommandMatcher import GeneralCommandMatcher
-from GameEnvironment.VoiceRecorder import VoiceRecorder
+from GameEnvironment.AdvancedVoiceRecorder import AdvancedVoiceRecorder
 
 
 class DanielMatcher(GeneralCommandMatcher):
@@ -11,7 +11,7 @@ class DanielMatcher(GeneralCommandMatcher):
         self.command_files = command_files
         self.feature_vectors_by_command = {}
         self.load_commands()
-        self.feature_extractor = FeatureExtractor(
+        self.feature_extractor = MFCCFeatureExtractor(
             commands=['UP', 'DOWN', 'LEFT', 'RIGHT', 'SILENCE'],
             command_records_path='./GameEnvironment/CommandRecords/'
         )
@@ -24,9 +24,9 @@ class DanielMatcher(GeneralCommandMatcher):
             self.feature_vectors_by_command[command] = command_features
 
     def get_closest(self, target_signal):
-        input_signal = VoiceRecorder.voice_activity_detection(target_signal, self.sample_rate)
+        input_signal = AdvancedVoiceRecorder.voice_activity_detection(target_signal, self.sample_rate)
         closest_command = 'SILENCE'
-        
+
         if self.considered_as_silence(input_signal):
             return closest_command
 

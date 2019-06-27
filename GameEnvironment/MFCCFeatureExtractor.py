@@ -3,7 +3,7 @@ from glob import glob
 from python_speech_features import mfcc
 
 
-class FeatureExtractor:
+class MFCCFeatureExtractor:
     SavePath = './GameEnvironment/CommandFeatures/'
 
     def __init__(self, commands, command_records_path):
@@ -45,5 +45,5 @@ class FeatureExtractor:
         return extended_coeff_matrix
 
     def save_features(self, array, command):
-        file_name = FeatureExtractor.SavePath + command + '.npy'
+        file_name = MFCCFeatureExtractor.SavePath + command + '.npy'
         np.save(file_name, array)
