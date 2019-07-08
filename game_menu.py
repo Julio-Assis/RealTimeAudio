@@ -1,6 +1,7 @@
 from GameEnvironment.GameEnvironment import GameEnvironment
 from GameEnvironment.DumbMatcher import DumbMatcher
 from GameEnvironment.DanielMatcher import DanielMatcher
+from GameEnvironment.MartinsMatcher import MartinsMatcher
 from GameEnvironment.FFTFeatureExtractor import FFTFeatureExtractor
 from GameEnvironment.MFCCFeatureExtractor import MFCCFeatureExtractor
 from GameEnvironment.AdvancedVoiceRecorder import AdvancedVoiceRecorder
@@ -56,7 +57,7 @@ def execute_game_mode(game_name, game_mode):
     elif game_mode == 3:
         play_with_dumb_matcher(game_name)
     elif game_mode == 4:
-        raise Exception('Not implemented matcher.')
+        play_with_martins_matcher(game_name)
     elif game_mode == 5:
         play_with_daniel_matcher(game_name)
     else:
@@ -92,6 +93,18 @@ def play_with_dumb_matcher(game_name):
     transformer.extract_features()
     files = glob(FFTFeatureExtractor.SavePath + '*')
     matcher = DumbMatcher(frames, sample_rate, channels, files)
+
+    game = GameEnvironment(game_name, frames, sample_rate, channels)
+    game.run_game(game.play_with_voice, matcher=matcher)
+
+def play_with_martins_matcher(game_name):
+    sample_rate = 44100
+    frames = 882
+    channels = 1
+    voice_recorder = BasicVoiceRecorder(game_name)
+    voice_recorder.record_commands(sample_rate, sample_rate, channels)
+    files = glob(BasicVoiceRecorder.SavePath + '*')
+    matcher = MartinsMatcher(frames, sample_rate, channels, files)
 
     game = GameEnvironment(game_name, frames, sample_rate, channels)
     game.run_game(game.play_with_voice, matcher=matcher)

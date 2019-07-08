@@ -27,6 +27,7 @@ class GameEnvironment:
         self.env = []
         self.game_error = False
         self.create_env()
+        self.terminated = False
 
     def create_env(self):
 
@@ -87,7 +88,7 @@ class GameEnvironment:
             self.game_error = 'To play with voice you have to provide a matcher'
             play = False
 
-        while play:
+        while play and not self.terminated:
             print('-'*20)
             print('recording new command...')
             command_signal = sd.rec(
@@ -143,7 +144,7 @@ class GameEnvironment:
         print("timesteps %i reward %0.2f" % (total_timesteps, total_reward))
 
     def run_game(self, mode, matcher=None):
-
+        self.terminated = False
         if matcher:
             t = threading.Thread(target=mode, args=(matcher,))
         else:
@@ -153,6 +154,7 @@ class GameEnvironment:
         while 1 and not self.game_error:
             window_still_open = self.rollout()
             if window_still_open == False:
+                self.terminated = True
                 break
 
         if self.game_error:
